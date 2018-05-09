@@ -144,15 +144,7 @@ function downloadLink(i) {
 
 function xml() {
 	var url = "https://comment.bilibili.com/" + cid + ".xml";
-	var saveas = document.createElement("a");
-	saveas.href = url;
-	saveas.style.display = "none";
-	document.body.appendChild(saveas);
-	saveas.download = cid + ".xml";
-	saveas.click();
-	setTimeout(function() {
-		saveas.parentNode.removeChild(saveas);
-	}, 1000);
+	blobDownload(url, cid + ".xml");
 }
 
 function ass() {
@@ -171,12 +163,12 @@ function ass() {
 
 function gotFile(name, content) {
 	var danmaku = parseFile(content);
-	console.log(danmaku);
+	//console.log(danmaku);
 	var ass = generateASS(setPosition(danmaku), {
 		"title": document.title,
 		"ori": name,
 	});
-	blobDownload(ass, name.replace(/\.[^.]*$/, "") + ".ass"); //"\ufeff" + 
+	assDownload(ass, name.replace(/\.[^.]*$/, "") + ".ass"); //"\ufeff" + 
 }
 
 function parseFile(content) {
@@ -184,11 +176,18 @@ function parseFile(content) {
     return parseXML(content);
 }
 
-function blobDownload(data, filename) {
+function assDownload(data, filename) {
 	var blob = new Blob([data], {
 		type: "application/octet-stream"
 	});
 	var url = window.URL.createObjectURL(blob);
+	blobDownload(url, filename);
+	document.addEventListener("unload", function() {
+		window.URL.revokeObjectURL(url);
+	});
+}
+
+function blobDownload(url, filename) {
 	var saveas = document.createElement("a");
 	saveas.href = url;
 	saveas.style.display = "none";
@@ -198,7 +197,4 @@ function blobDownload(data, filename) {
 	setTimeout(function() {
 		saveas.parentNode.removeChild(saveas);
 	}, 1000);
-	document.addEventListener("unload", function() {
-		window.URL.revokeObjectURL(url);
-	});
 }

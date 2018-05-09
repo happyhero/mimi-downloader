@@ -9,7 +9,7 @@ const request = require("request");
 const progress = require("progress-stream");
 const async = require("async");
 
-var referer, playUrl, downloadPath, count, links, cid, isDownloading = false;
+var referer, playUrl, count, links, cid, isDownloading = false;
 
 function getVideoUrl() {
 	var videoUrl = $("#videoUrl").val();// || "https://www.bilibili.com/bangumi/play/ep90832";
@@ -92,7 +92,6 @@ function parseData(data) {
 function download(data) {
 	if (isDownloading) return;
 	isDownloading = true;
-	downloadPath = $("#downloadPath").val() || "";
 	var functionArray = new Array();
 	$(".download").show().html("");
 	for (var i = 0; i < count; i++) {
@@ -111,6 +110,7 @@ function download(data) {
 }
 
 function downloadLink(i) {
+	var downloadPath = $("#downloadPath").val() || "";
 	var file = path.join(downloadPath, cid + "-" + i + ".flv");
 	var options = {
 		url: links[i],

@@ -44,43 +44,43 @@ var config = {
 	'debug': false,						// 打印调试信息
 };
 
-var debug = config.debug ? console.log.bind(console) : function () { };
+var debug = config.debug ? console.log.bind(console) : function() { };
 
 // 将字典中的值填入字符串
-var fillStr = function (str) {
+var fillStr = function(str) {
 	var dict = Array.apply(Array, arguments);
-	return str.replace(/{{([^}]+)}}/g, function (r, o) {
+	return str.replace(/{{([^}]+)}}/g, function(r, o) {
 		var ret;
-		dict.some(function (i) { return ret = i[o]; });
+		dict.some(function(i) { return ret = i[o]; });
 		return ret || '';
 	});
 };
 
 // 将颜色的数值化为十六进制字符串表示
-var RRGGBB = function (color) {
+var RRGGBB = function(color) {
 	var t = Number(color).toString(16).toUpperCase();
 	return (Array(7).join('0') + t).slice(-6);
 };
 
 // 将可见度转换为透明度
-var hexAlpha = function (opacity) {
+var hexAlpha = function(opacity) {
 	var alpha = Math.round(0xFF * (1 - opacity)).toString(16).toUpperCase();
 	return Array(3 - alpha.length).join('0') + alpha;
 };
 
 // 字符串
-var funStr = function (fun) {
+var funStr = function(fun) {
 	return fun.toString().split(/\r\n|\n|\r/).slice(1, -1).join('\n');
 };
 
 // 平方和开根
-var hypot = Math.hypot ? Math.hypot.bind(Math) : function () {
+var hypot = Math.hypot ? Math.hypot.bind(Math) : function() {
 	return Math.sqrt([0].concat(Array.apply(Array, arguments))
-		.reduce(function (x, y) { return x + y * y; }));
+		.reduce(function(x, y) { return x + y * y; }));
 };
 
 // 创建下载
-var startDownload = function (data, filename) {
+var startDownload = function(data, filename) {
 	var blob = new Blob([data], { type: 'application/octet-stream' });
 	var url = window.URL.createObjectURL(blob);
 	var saveas = document.createElement('a');
@@ -89,34 +89,34 @@ var startDownload = function (data, filename) {
 	document.body.appendChild(saveas);
 	saveas.download = filename;
 	saveas.click();
-	setTimeout(function () { saveas.parentNode.removeChild(saveas); }, 1000)
-	document.addEventListener('unload', function () { window.URL.revokeObjectURL(url); });
+	setTimeout(function() { saveas.parentNode.removeChild(saveas); }, 1000)
+	document.addEventListener('unload', function() { window.URL.revokeObjectURL(url); });
 };
 
 // 计算文字宽度
-var calcWidth = (function () {
+var calcWidth = (function() {
 
 	// 使用Canvas计算
-	var calcWidthCanvas = function () {
+	var calcWidthCanvas = function() {
 		var canvas = document.createElement("canvas");
 		var context = canvas.getContext("2d");
-		return function (fontname, text, fontsize) {
+		return function(fontname, text, fontsize) {
 			context.font = 'bold ' + fontsize + 'px ' + fontname;
 			return Math.ceil(context.measureText(text).width + config.space);
 		};
 	}
 
 	// 使用Div计算
-	var calcWidthDiv = function () {
+	var calcWidthDiv = function() {
 		var d = document.createElement('div');
 		d.setAttribute('style', [
 			'all: unset', 'top: -10000px', 'left: -10000px',
 			'width: auto', 'height: auto', 'position: absolute',
 		'',].join(' !important; '));
-		var ld = function () { document.body.parentNode.appendChild(d); }
+		var ld = function() { document.body.parentNode.appendChild(d); }
 		if (!document.body) document.addEventListener('DOMContentLoaded', ld);
 		else ld();
-		return function (fontname, text, fontsize) {
+		return function(fontname, text, fontsize) {
 			d.textContent = text;
 			d.style.font = 'bold ' + fontsize + 'px ' + fontname;
 			return d.clientWidth + config.space;
@@ -135,7 +135,7 @@ var calcWidth = (function () {
 }());
 
 // 选择合适的字体
-var choseFont = function (fontlist) {
+var choseFont = function(fontlist) {
 	// 检查这个字串的宽度来检查字体是否存在
 	var sampleText =
 		'The quick brown fox jumps over the lazy dog' +
@@ -150,13 +150,13 @@ var choseFont = function (fontlist) {
 	];
 	// 如果被检查的字体和基准字体可以渲染出不同的宽度
 	// 那么说明被检查的字体总是存在的
-	var diffFont = function (base, test) {
+	var diffFont = function(base, test) {
 		var baseSize = calcWidth(base, sampleText, 72);
 		var testSize = calcWidth(test + ',' + base, sampleText, 72);
 		return baseSize !== testSize;
 	};
-	var validFont = function (test) {
-		var valid = sampleFont.some(function (base) {
+	var validFont = function(test) {
+		var valid = sampleFont.some(function(base) {
 			return diffFont(base, test);
 		});
 		debug('font %s: %o', test, valid);
@@ -170,9 +170,9 @@ var choseFont = function (fontlist) {
 };
 
 // 从备选的字体中选择一个机器上提供了的字体
-var initFont = (function () {
+var initFont = (function() {
 	var done = false;
-	return function () {
+	return function() {
 		if (done) return; done = true;
 		calcWidth = calcWidth.bind(window,
 			config.font = choseFont(config.fontlist)
@@ -180,8 +180,8 @@ var initFont = (function () {
 	};
 }());
 
-var generateASS = function (danmaku, info) {
-	var assHeader = fillStr(funStr(function () {/*! ASS弹幕文件文件头
+var generateASS = function(danmaku, info) {
+	var assHeader = fillStr(funStr(function() {/*! ASS弹幕文件文件头
 [Script Info]
 Title: {{title}}
 Original Script: 根据 {{ori}} 的弹幕信息，由 https://github.com/tiansh/us-danmaku 生成
@@ -201,15 +201,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 	*/}), config, info, {'alpha': hexAlpha(config.opacity) });
 	// 补齐数字开头的0
-	var paddingNum = function (num, len) {
+	var paddingNum = function(num, len) {
 		num = '' + num;
 		while (num.length < len) num = '0' + num;
 		return num;
 	};
 	// 格式化时间
-	var formatTime = function (time) {
+	var formatTime = function(time) {
 		time = 100 * time ^ 0;
-		var l = [[100, 2], [60, 2], [60, 2], [Infinity, 0]].map(function (c) {
+		var l = [[100, 2], [60, 2], [60, 2], [Infinity, 0]].map(function(c) {
 			var r = time % c[0];
 			time = (time - r) / c[0];
 			return paddingNum(r, c[1]);
@@ -217,12 +217,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 		return l.slice(0, -1).join(':') + '.' + l[3];
 	};
 	// 格式化特效
-	var format = (function () {
+	var format = (function() {
 		// 适用于所有弹幕
-		var common = function (line) {
+		var common = function(line) {
 			var s = '';
-			var rgb = line.color.split(/(..)/).filter(function (x) { return x; })
-				.map(function (x) { return parseInt(x, 16); });
+			var rgb = line.color.split(/(..)/).filter(function(x) { return x; })
+				.map(function(x) { return parseInt(x, 16); });
 			// 如果不是白色，要指定弹幕特殊的颜色
 			if (line.color !== 'FFFFFF') // line.color 是 RRGGBB 格式
 				s += '\\c&H' + line.color.split(/(..)/).reverse().join('');
@@ -233,19 +233,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 			return s;
 		};
 		// 适用于从右到左弹幕
-		var r2l = function (line) {
+		var r2l = function(line) {
 			return '\\move(' + [
 				line.poss.x, line.poss.y, line.posd.x, line.posd.y
 			].join(',') + ')';
 		};
 		// 适用于固定位置弹幕
-		var fix = function (line) {
+		var fix = function(line) {
 			return '\\pos(' + [
 				line.poss.x, line.poss.y
 			].join(',') + ')';
 		};
-		var withCommon = function (f) {
-			return function (line) { return f(line) + common(line); };
+		var withCommon = function(f) {
+			return function(line) { return f(line) + common(line); };
 		};
 		return {
 			'R2L': withCommon(r2l),
@@ -253,12 +253,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 		};
 	}());
 	// 转义一些字符
-	var escapeAssText = function (s) {
+	var escapeAssText = function(s) {
 		// "{"、"}"字符libass可以转义，但是VSFilter不可以，所以直接用全角补上
 		return s.replace(/{/g, '｛').replace(/}/g, '｝').replace(/\r|\n/g, '');
 	};
 	// 将一行转换为ASS的事件
-	var convert2Ass = function (line) {
+	var convert2Ass = function(line) {
 		return 'Dialogue: ' + [
 			0,
 			formatTime(line.stime),
@@ -271,7 +271,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 	};
 	return assHeader +
 		danmaku.map(convert2Ass)
-		.filter(function (x) { return x; })
+		.filter(function(x) { return x; })
 		.join('\n');
 };
 
@@ -318,8 +318,8 @@ td := p + ts
 */
 
 // 滚动弹幕
-var normalDanmaku = (function (wc, hc, b, u, maxr) {
-	return function () {
+var normalDanmaku = (function(wc, hc, b, u, maxr) {
+	return function() {
 		// 初始化屏幕外面是不可用的
 		var used = [
 			{ 'p': -Infinity, 'm': 0, 'tf': Infinity, 'td': Infinity, 'b': false },
@@ -327,17 +327,17 @@ var normalDanmaku = (function (wc, hc, b, u, maxr) {
 			{ 'p': hc - b, 'm': hc, 'tf': Infinity, 'td': Infinity, 'b': true },
 		];
 		// 检查一些可用的位置
-		var available = function (hv, t0s, t0l, b) {
+		var available = function(hv, t0s, t0l, b) {
 			var suggestion = [];
 			// 这些上边缘总之别的块的下边缘
-			used.forEach(function (i) {
+			used.forEach(function(i) {
 				if (i.m > hc) return;
 				var p = i.m;
 				var m = p + hv;
 				var tas = t0s;
 				var tal = t0l;
 				// 这些块的左边缘总是这个区域里面最大的边缘
-				used.forEach(function (j) {
+				used.forEach(function(j) {
 					if (j.p >= m) return;
 					if (j.m <= p) return;
 					if (j.b && b) return;
@@ -351,10 +351,10 @@ var normalDanmaku = (function (wc, hc, b, u, maxr) {
 				});
 			});
 			// 根据高度排序
-			suggestion.sort(function (x, y) { return x.p - y.p; });
+			suggestion.sort(function(x, y) { return x.p - y.p; });
 			var mr = maxr;
 			// 又靠右又靠下的选择可以忽略，剩下的返回
-			suggestion = suggestion.filter(function (i) {
+			suggestion = suggestion.filter(function(i) {
 				if (i.r >= mr) return false;
 				mr = i.r;
 				return true;
@@ -362,26 +362,26 @@ var normalDanmaku = (function (wc, hc, b, u, maxr) {
 			return suggestion;
 		};
 		// 添加一个被使用的
-		var use = function (p, m, tf, td) {
+		var use = function(p, m, tf, td) {
 			used.push({ 'p': p, 'm': m, 'tf': tf, 'td': td, 'b': false });
 		};
 		// 根据时间同步掉无用的
-		var syn = function (t0s, t0l) {
-			used = used.filter(function (i) { return i.tf > t0s || i.td > t0l; });
+		var syn = function(t0s, t0l) {
+			used = used.filter(function(i) { return i.tf > t0s || i.td > t0l; });
 		};
 		// 给所有可能的位置打分，分数是[0, 1)的
-		var score = function (i) {
+		var score = function(i) {
 			if (i.r > maxr) return -Infinity;
 			return 1 - hypot(i.r / maxr, i.p / hc) * Math.SQRT1_2;
 		};
 		// 添加一条
-		return function (t0s, wv, hv, b) {
+		return function(t0s, wv, hv, b) {
 			var t0l = wc / (wv + wc) * u + t0s;
 			syn(t0s, t0l);
 			var al = available(hv, t0s, t0l, b);
 			if (!al.length) return null;
-			var scored = al.map(function (i) { return [score(i), i]; });
-			var best = scored.reduce(function (x, y) {
+			var scored = al.map(function(i) { return [score(i), i]; });
+			var best = scored.reduce(function(x, y) {
 				return x[0] > y[0] ? x : y;
 			})[1];
 			var ts = t0s + best.r;
@@ -397,17 +397,17 @@ var normalDanmaku = (function (wc, hc, b, u, maxr) {
 }(config.playResX, config.playResY, config.bottom, config.r2ltime, config.max_delay));
 
 // 顶部、底部弹幕
-var sideDanmaku = (function (hc, b, u, maxr) {
-	return function () {
+var sideDanmaku = (function(hc, b, u, maxr) {
+	return function() {
 		var used = [
 			{ 'p': -Infinity, 'm': 0, 'td': Infinity, 'b': false },
 			{ 'p': hc, 'm': Infinity, 'td': Infinity, 'b': false },
 			{ 'p': hc - b, 'm': hc, 'td': Infinity, 'b': true },
 		];
 		// 查找可用的位置
-		var fr = function (p, m, t0s, b) {
+		var fr = function(p, m, t0s, b) {
 			var tas = t0s;
-			used.forEach(function (j) {
+			used.forEach(function(j) {
 				if (j.p >= m) return;
 				if (j.m <= p) return;
 				if (j.b && b) return;
@@ -416,41 +416,41 @@ var sideDanmaku = (function (hc, b, u, maxr) {
 			return { 'r': tas - t0s, 'p': p, 'm': m };
 		};
 		// 顶部
-		var top = function (hv, t0s, b) {
+		var top = function(hv, t0s, b) {
 			var suggestion = [];
-			used.forEach(function (i) {
+			used.forEach(function(i) {
 				if (i.m > hc) return;
 				suggestion.push(fr(i.m, i.m + hv, t0s, b));
 			});
 			return suggestion;
 		};
 		// 底部
-		var bottom = function (hv, t0s, b) {
+		var bottom = function(hv, t0s, b) {
 			var suggestion = [];
-			used.forEach(function (i) {
+			used.forEach(function(i) {
 				if (i.p < 0) return;
 				suggestion.push(fr(i.p - hv, i.p, t0s, b));
 			});
 			return suggestion;
 		};
-		var use = function (p, m, td) {
+		var use = function(p, m, td) {
 			used.push({ 'p': p, 'm': m, 'td': td, 'b': false });
 		};
-		var syn = function (t0s) {
-			used = used.filter(function (i) { return i.td > t0s; });
+		var syn = function(t0s) {
+			used = used.filter(function(i) { return i.td > t0s; });
 		};
 		// 挑选最好的方案：延迟小的优先，位置不重要
-		var score = function (i, is_top) {
+		var score = function(i, is_top) {
 			if (i.r > maxr) return -Infinity;
-			var f = function (p) { return is_top ? p : (hc - p); };
+			var f = function(p) { return is_top ? p : (hc - p); };
 			return 1 - (i.r / maxr * (31/32) + f(i.p) / hc * (1/32));
 		};
-		return function (t0s, hv, is_top, b) {
+		return function(t0s, hv, is_top, b) {
 			syn(t0s);
 			var al = (is_top ? top : bottom)(hv, t0s, b);
 			if (!al.length) return null;
-			var scored = al.map(function (i) { return [score(i, is_top), i]; });
-			var best = scored.reduce(function (x, y) {
+			var scored = al.map(function(i) { return [score(i, is_top), i]; });
+			var best = scored.reduce(function(x, y) {
 				return x[0] > y[0] ? x : y;
 			})[1];
 			use(best.p, best.m, best.r + t0s + u)
@@ -460,15 +460,15 @@ var sideDanmaku = (function (hc, b, u, maxr) {
 }(config.playResY, config.bottom, config.fixtime, config.max_delay));
 
 // 为每条弹幕安置位置
-var setPosition = function (danmaku) {
+var setPosition = function(danmaku) {
 	var normal = normalDanmaku(), side = sideDanmaku();
 	return danmaku
-		.sort(function (x, y) { return x.time - y.time; })
-		.map(function (line) {
+		.sort(function(x, y) { return x.time - y.time; })
+		.map(function(line) {
 			var font_size = Math.round(line.size * config.font_size);
 			var width = calcWidth(line.text, font_size);
 			switch (line.mode) {
-				case 'R2L': return (function () {
+				case 'R2L': return (function() {
 					var pos = normal(line.time, width, font_size, line.bottom);
 					if (!pos) return null;
 					line.type = 'R2L';
@@ -484,7 +484,7 @@ var setPosition = function (danmaku) {
 					line.dtime = config.r2ltime + line.stime;
 					return line;
 				}());
-				case 'TOP': case 'BOTTOM': return (function (isTop) {
+				case 'TOP': case 'BOTTOM': return (function(isTop) {
 					var pos = side(line.time, font_size, isTop, line.bottom);
 					if (!pos) return null;
 					line.type = 'Fix';
@@ -499,8 +499,8 @@ var setPosition = function (danmaku) {
 				default: return null;
 			};
 		})
-		.filter(function (l) { return l; })
-		.sort(function (x, y) { return x.stime - y.stime; });
+		.filter(function(l) { return l; })
+		.sort(function(x, y) { return x.stime - y.stime; });
 };
 
 /*
@@ -508,26 +508,26 @@ var setPosition = function (danmaku) {
  */
 
 // 获取xml
-var fetchXML = function (cid, callback) {
+var fetchXML = function(cid, callback) {
 	GM_xmlhttpRequest({
 		'method': 'GET',
 		'url': 'http://comment.bilibili.com/{{cid}}.xml'.replace('{{cid}}', cid),
-		'onload': function (resp) {
+		'onload': function(resp) {
 			var content = resp.responseText.replace(/(?:[\0-\x08\x0B\f\x0E-\x1F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/g, "");
 			callback(content);
 		}
 	});
 };
 
-var fetchDanmaku = function (cid, callback) {
-	fetchXML(cid, function (content) {
+var fetchDanmaku = function(cid, callback) {
+	fetchXML(cid, function(content) {
 		callback(parseXML(content));
 	});
 };
 
-var parseXML = function (content) {
+var parseXML = function(content) {
 	var data = (new DOMParser()).parseFromString(content, 'text/xml');
-	return Array.apply(Array, data.querySelectorAll('d')).map(function (line) {
+	return Array.apply(Array, data.querySelectorAll('d')).map(function(line) {
 		var info = line.getAttribute('p').split(','), text = line.textContent;
 		return {
 			'text': text,
@@ -545,7 +545,7 @@ var parseXML = function (content) {
 };
 
 // 获取当前cid
-var getCid = function (callback) {
+var getCid = function(callback) {
 	debug('get cid...');
 	var cid = null, src = null;
 	try {
@@ -564,22 +564,22 @@ var getCid = function (callback) {
 	else if (src) GM_xmlhttpRequest({
 		'method': 'GET',
 		'url': 'http://interface.bilibili.com/player?' + src,
-		'onload': function (resp) {
+		'onload': function(resp) {
 			try { cid = Number(resp.responseText.match(/<chatid>(\d+)<\/chatid>/)[1]); }
 			catch (e) { }
 			setTimeout(callback, 0, cid || undefined);
 		},
-		'onerror': function () { setTimeout(callback, 0); }
+		'onerror': function() { setTimeout(callback, 0); }
 	}); else {
 		setTimeout(getCid, 100, callback);
 	}
 };
 
 // 下载的主程序
-var mina = function (cid0) {
-	getCid(function (cid) {
+var mina = function(cid0) {
+	getCid(function(cid) {
 		cid = cid || cid0;
-		fetchDanmaku(cid, function (danmaku) {
+		fetchDanmaku(cid, function(danmaku) {
 			var name;
 			try { name = document.querySelector('.viewbox h1, .viewbox h2').textContent; }
 			catch (e) { name = '' + cid; }
@@ -594,7 +594,7 @@ var mina = function (cid0) {
 };
 
 // 显示出下载弹幕按钮
-var showButton = function (count) {
+var showButton = function(count) {
 	GM_addStyle('.arc-toolbar .block.fav { margin-right: 0 } .arc-toolbar .block { padding: 0 18px; }');
 	var favbar = document.querySelector('.arc-toolbar .block.fav');
 	var assdown = document.createElement('div');
@@ -602,9 +602,9 @@ var showButton = function (count) {
 	assdown = assdown.firstChild;
 	favbar.parentNode.insertBefore(assdown, favbar.nextSibling);
 	var timer = null, frame = 0;
-	assdown.addEventListener('mouseenter', function () { frame = 0; timer = setTimeout(anim, 0); });
-	assdown.addEventListener('mouseleave', function () { clearTimeout(timer); timer = null; });
-	var anim = function () {
+	assdown.addEventListener('mouseenter', function() { frame = 0; timer = setTimeout(anim, 0); });
+	assdown.addEventListener('mouseleave', function() { clearTimeout(timer); timer = null; });
+	var anim = function() {
 		if (frame === 16) { timer = null; return; }
 		frame++;
 		assdown.querySelector('i').style.backgroundPosition = '-' + (frame * 80) + 'px 0';
@@ -613,31 +613,31 @@ var showButton = function (count) {
 };
 
 // 初始化按钮
-var initButton = (function () {
+var initButton = (function() {
 	var done = false;
-	return function () {
+	return function() {
 		debug('init button');
 		if (!document.querySelector('.arc-toolbar .block.fav')) return;
-		getCid(function (cid) {
+		getCid(function(cid) {
 			debug('cid = %o', cid);
 			if (!cid || done) return; else done = true;
-			fetchDanmaku(cid, function (danmaku) {
+			fetchDanmaku(cid, function(danmaku) {
 				showButton(danmaku.length);
-				document.querySelector('#assdown').addEventListener('click', function (e) {
+				document.querySelector('#assdown').addEventListener('click', function(e) {
 					e.preventDefault();
 					mina(cid);
 				});
 			});
 		});
-	};
+	}
 }());
 
 /*
  * Common
  */
 
- // 初始化
-var init = function () {
+// 初始化
+var init = function() {
 	initFont();
 	initButton();
 };

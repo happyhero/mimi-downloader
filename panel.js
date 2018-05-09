@@ -1,6 +1,6 @@
-const electron = require("electron").remote;
-const ipcRenderer = require("electron").ipcRenderer;
-const BrowserWindow = electron.BrowserWindow;
+//const electron = require("electron").remote;
+//const ipcRenderer = require("electron").ipcRenderer;
+//const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const url = require("url");
 const https = require("https");
@@ -40,8 +40,6 @@ function getData() {
 	playUrl = getPlayUrl();
 	if (!referer || !playUrl) return;
 	var data, html = "";
-	cid = playUrl.split("?cid=")[1].split("&")[0]; //"11090110"
-	$("#cid").html(cid);
 
 	https.get(playUrl, function(res) {
 
@@ -50,16 +48,26 @@ function getData() {
 		});
 		res.on("end", function() {
 			data = JSON.parse(html);
-			$(".info").slideDown();
-			show(data);
+			parseData(data);
 		});
 	}).on("error", function() {
 		alert("获取数据出错！");
 	});
 }
 
-function show(data) {
+function parseData(data) {
+	$(".info").slideDown();
 	$("tbody").html("");
+	cid = playUrl.split("?cid=")[1].split("&")[0]; //"11090110"
+	$("#cid").html(cid);
+	var qualityArray = {
+		112: '高清 1080P+',
+		80: '高清 1080P',
+		64: '高清 720P',
+		32: '清晰 480P',
+		15: '流畅 360P'
+	}
+	$("#quality").html(qualityArray[data.quality]);
 	var target = data.durl;
 	count = target.length;
 	links = new Array();
@@ -142,8 +150,9 @@ function xml() {
 	document.body.appendChild(saveas);
 	saveas.download = cid + ".xml";
 	saveas.click();
-	setTimeout(function () { saveas.parentNode.removeChild(saveas); }, 1000)
-	document.addEventListener("unload", function () { window.URL.revokeObjectURL(url); });
+	setTimeout(function() {
+		saveas.parentNode.removeChild(saveas);
+	}, 1000);
 }
 
 function ass() {
@@ -171,12 +180,14 @@ function gotFile(name, content) {
 }
 
 function parseFile(content) {
-    content = content.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+    content = content.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "");
     return parseXML(content);
 }
 
 function blobDownload(data, filename) {
-	var blob = new Blob([data], { type: "application/octet-stream" });
+	var blob = new Blob([data], {
+		type: "application/octet-stream"
+	});
 	var url = window.URL.createObjectURL(blob);
 	var saveas = document.createElement("a");
 	saveas.href = url;
@@ -184,6 +195,10 @@ function blobDownload(data, filename) {
 	document.body.appendChild(saveas);
 	saveas.download = filename;
 	saveas.click();
-	setTimeout(function () { saveas.parentNode.removeChild(saveas); }, 1000)
-	document.addEventListener("unload", function () { window.URL.revokeObjectURL(url); });
+	setTimeout(function() {
+		saveas.parentNode.removeChild(saveas);
+	}, 1000);
+	document.addEventListener("unload", function() {
+		window.URL.revokeObjectURL(url);
+	});
 }

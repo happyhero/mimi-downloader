@@ -7,7 +7,7 @@ const async = require("async");
 const electron = require("electron");
 const { dialog, shell } = electron.remote;
 
-var videoUrl, playUrl, count, links, cid, downloadArray = new Array(), downloadIndex = 0, manual = false;
+var videoUrl, playUrl, count, links, cid, downloadArray = new Array(), downloadIndex = 0;
 var debug = !true;
 
 function getVideoUrl() {
@@ -47,18 +47,10 @@ function getPlayUrl() {
 	return playUrl;
 }
 
-function backupUrl() {
-	alert("[Error]获取PlayUrl或下载链接出错，请手动输入PlayUrl！");
-	$("#backup-url").show();
-	$("#playUrl").parent().addClass("has-error has-feedback");
-	$("#nav, .info").hide();
-	manual = true;
-}
-
 function getAid() {
 	videoUrl = getVideoUrl();
-	if (manual) playUrl = getPlayUrl();
-	if (!videoUrl || (manual && !playUrl)) return; // || !playUrl
+	playUrl = getPlayUrl();
+	if (!videoUrl || !playUrl) return;
 
 	if (videoUrl.split("/av")[1]) {
 		aid = videoUrl.split("/av")[1].split("/")[0];
@@ -93,7 +85,10 @@ function getInfo() {
 			for (var i in data) {
 				if (i == "cid") {
 					cid = data[i];
-					playUrl = "http://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&otype=json&platform=bilihelper&type=flv&quality=80&qn=80&cid=" + cid;
+					if (cid != playUrl.split("?cid=")[1].split("&")[0]) {
+						alert("[Warning]视频地址和PlayUrl不匹配，可能造成问题！");
+						//cid = playUrl.split("?cid=")[1].split("&")[0];
+					}
 				}
 				if (data[i] && data[i].toString().indexOf("hdslb.com") != -1) { //解析图片地址
 					data[i] = '<a href="' + data[i] + '" download=""><img src="' + data[i] + '"></a>';
@@ -102,17 +97,6 @@ function getInfo() {
 				<td class=\"capitalize\">" + i + "</td>\
 				<td>" + data[i] + "</td>\
 				</tr>");
-			}
-
-			if (manual) {
-				playUrl = getPlayUrl();
-				if (cid != playUrl.split("?cid=")[1].split("&")[0]) {
-					//backupUrl();
-					//return; //视频地址和PlayUrl不匹配时结束
-					alert("[Warning]视频地址和PlayUrl不匹配，可能造成问题！");
-					cid = playUrl.split("?cid=")[1].split("&")[0];
-				}
-				manual = false;
 			}
 			getData(playUrl);
 		}
@@ -124,7 +108,7 @@ function getData(url) {
 		type: "get",
 		dataType: "text",
 		error: function(xhr, status, error) {
-			backupUrl();
+			alert("[Error]获取PlayUrl或下载链接出错！");
 		},
 		success: function(data, status, xhr) {
 			//console.log(url, data);
@@ -137,10 +121,9 @@ function getData(url) {
 function parseData(data) {
 	var target = data.durl;
 	if (!target) {
-		backupUrl();
+		alert("[Error]获取PlayUrl或下载链接出错！");
 		return;
 	}
-	$("#backup-url").hide();
 	$("#cid").html(cid);
 	count = target.length;
 	var qualityArray = {
@@ -162,8 +145,8 @@ function parseData(data) {
 		links.push(part.url);
 		$("tbody").eq(0).append("<tr>\
 			<td>" + part.order + "</td>\
-			<td>" + part.length + "</td>\
-			<td>" + part.size + "</td>\
+			<td>" + part.length / 1000 + "</td>\
+			<td>" + part.size / 1e6 + "</td>\
 			<td>\
 				<div class=\"checkbox\">\
 					<label>\

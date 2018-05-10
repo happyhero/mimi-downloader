@@ -17,8 +17,8 @@ npm install
 # Run the app
 npm start
 ```
-If everything's OK, you'll see a new window named "Mimi Downloader". Input the videourl, then follow the guide to download files.  
-If playurl is required, you can get it like this:
+If everything's OK, you'll see a new window named "Mimi Downloader". Input the videourl and playurl, then follow the guide to download files.  
+You can get playurl like this:
 
 ![demo-video](help.png)
 

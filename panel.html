@@ -11,7 +11,7 @@
 	.mt20 {
 		margin-top: 20px;
 	}
-	.info, #nav, #backup-url, .glyphicon {
+	.info, #nav, .glyphicon {
 		display: none;
 	}
 	.has-feedback .glyphicon {
@@ -48,14 +48,6 @@
 		<div class="form-group">
 			<label class="control-label">视频链接</label>
 			<input type="text" class="form-control" id="videoUrl"/>
-  			<span class="glyphicon glyphicon-remove form-control-feedback"></span>
-		</div>
-	</div>
-	
-	<div class="row" id="backup-url">
-		<div class="form-group">
-			<label class="control-label">PlayUrl</label>
-			<input type="text" class="form-control" id="playUrl"/>
   			<span class="glyphicon glyphicon-remove form-control-feedback"></span>
 		</div>
 	</div>
@@ -144,6 +136,8 @@
 
 <script src="cdn/jquery-3.2.1.min.js"></script>
 <script>if (typeof module === "object") { window.jQuery = window.$ = module.exports; }</script>
+<script src="xml2json.js"></script>
+<script src="md5.js"></script>
 <script src="ass.js"></script>
 <script src="panel.js"></script>
 <script>
@@ -163,7 +157,7 @@ $("button").each(function() {
 $("#downloadPath").val(__dirname);
 
 function help() {
-	alert("请填写视频链接（即视频播放界面的url），然后点击“获取下载链接”进行下一步。如果提示手动输入PlayUrl，请用浏览器打开视频链接，选择html5播放器播放视频，在浏览器的开发者菜单中查看XHR请求，找到名称为playurl的项，将其地址填入输入框内即可。");
+	alert("请填写视频链接（即视频播放界面的url），然后点击“获取下载链接”进行下一步。");
 }
 function about() {
 	alert("Mimi Downloader Ver 1.1.0\n\nWe are using Node.js " + process.versions.node + ", Chromium " + process.versions.chrome + ", and Electron " + process.versions.electron + ". Powered by Mimi.");

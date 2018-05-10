@@ -7,7 +7,7 @@ const async = require("async");
 const electron = require("electron");
 const { dialog, shell } = electron.remote;
 
-var videoUrl, playUrl, count, links, cid, downloadArray = new Array(), downloadIndex = 0, manual = false;
+var videoUrl, playUrl, count, links, cid, downloadArray = new Array(), downloadIndex = 0;
 var debug = !true;
 
 function getVideoUrl() {
@@ -26,39 +26,13 @@ function getVideoUrl() {
 	return videoUrl;
 }
 
-function getPlayUrl() {
-	var playUrl = $("#playUrl").val();
-	if (debug) playUrl = "https://bangumi.bilibili.com/player/web_api/v2/playurl?cid=11090110&appkey=84956560bc028eb7&otype=json&type=&quality=80&module=bangumi&season_type=1&qn=80&sign=d6d73e8fbbc2adacaf047c48714e8e69";
-	if (playUrl.indexOf("https://") != 0) {
-		if (playUrl.indexOf("http://") == 0) playUrl = playUrl.replace("http://", "https://");
-		else if (playUrl.indexOf("bilibili") != -1) playUrl = "https://" + playUrl;
-		else {
-			alert("[Error]无效的PlayUrl！");
-			$("#playUrl").parent().addClass("has-error has-feedback");
-			return null;
-		}
-	}
-	if (!playUrl.split("?cid=")[1]) {
-		alert("[Error]无效的PlayUrl！");
-		$("#playUrl").parent().addClass("has-error has-feedback");
-		return null;
-	}
-	$("#playUrl").parent().removeClass("has-error has-feedback");
-	return playUrl;
-}
-
 function backupUrl() {
 	alert("[Error]获取PlayUrl或下载链接出错，请手动输入PlayUrl！");
-	$("#backup-url").show();
-	$("#playUrl").parent().addClass("has-error has-feedback");
-	$("#nav, .info").hide();
-	manual = true;
 }
 
 function getAid() {
 	videoUrl = getVideoUrl();
-	if (manual) playUrl = getPlayUrl();
-	if (!videoUrl || (manual && !playUrl)) return; // || !playUrl
+	if (!videoUrl) return; // || !playUrl
 
 	if (videoUrl.split("/av")[1]) {
 		aid = videoUrl.split("/av")[1].split("/")[0];
@@ -93,7 +67,7 @@ function getInfo() {
 			for (var i in data) {
 				if (i == "cid") {
 					cid = data[i];
-					playUrl = "http://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&otype=json&platform=bilihelper&type=flv&quality=80&qn=80&cid=" + cid;
+					playUrl = generatePlayUrl();
 				}
 				if (data[i] && data[i].toString().indexOf("hdslb.com") != -1) { //解析图片地址
 					data[i] = '<a href="' + data[i] + '" download=""><img src="' + data[i] + '"></a>';
@@ -103,20 +77,27 @@ function getInfo() {
 				<td>" + data[i] + "</td>\
 				</tr>");
 			}
-
-			if (manual) {
-				playUrl = getPlayUrl();
-				if (cid != playUrl.split("?cid=")[1].split("&")[0]) {
-					//backupUrl();
-					//return; //视频地址和PlayUrl不匹配时结束
-					alert("[Warning]视频地址和PlayUrl不匹配，可能造成问题！");
-					cid = playUrl.split("?cid=")[1].split("&")[0];
-				}
-				manual = false;
-			}
 			getData(playUrl);
 		}
 	});
+}
+
+function generatePlayUrl() {
+	var type = 0, params, sign;
+	if (videoUrl.indexOf("bangumi") != -1 && videoUrl.indexOf("bangumi") != -1) type = 2;
+	else if (videoUrl.indexOf("bangumi") != -1) type = 1;
+	if (type) {
+		if (type == 2) params = "cid=" + cid + "&module=movie&player=1&quality=112&ts=1";
+		else params = "cid=" + cid + "&module=bangumi&player=1&quality=112&ts=1";
+		sign = hex_md5(params + "9b288147e5474dd2aa67085f716c560d");
+		return "http://bangumi.bilibili.com/player/web_api/playurl?" + params + "&sign=" + sign;
+	}
+	else {
+		params = "appkey=84956560bc028eb7&cid=" + cid + "&otype=json&qn=112&quality=112&type=";
+		sign = hex_md5(params + "94aba54af9065f71de72f5508f1cd42e");
+		return "http://interface.bilibili.com/v2/playurl?" + params + "&sign=" + sign;
+	}
+	//return "http://interface.bilibili.com/v2/playurl?appkey=84956560bc028eb7&otype=json&platform=bilihelper&type=flv&quality=80&qn=80&cid=" + cid;
 }
 
 function getData(url) {
@@ -127,8 +108,21 @@ function getData(url) {
 			backupUrl();
 		},
 		success: function(data, status, xhr) {
-			//console.log(url, data);
-			data = JSON.parse(data);
+			console.log(url, data);
+			if (url.indexOf("interface") != -1) data = JSON.parse(data);
+			else {/*
+				var temp = (new DOMParser()).parseFromString(data, 'text/xml');
+				data.durl = new Array();
+				for (var i in temp) {
+					//data.durl.push
+				}
+				console.log(data);*/
+				function convertXml(data) {
+				   	return xml2json((new DOMParser()).parseFromString(data, "text/xml"), " ");
+				}
+				data = convertXml(data);
+				console.log(data);
+			}
 			parseData(data);
 		}
 	});
@@ -140,7 +134,6 @@ function parseData(data) {
 		backupUrl();
 		return;
 	}
-	$("#backup-url").hide();
 	$("#cid").html(cid);
 	count = target.length;
 	var qualityArray = {

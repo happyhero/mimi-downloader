@@ -2,6 +2,8 @@
 
 A Bilibili video downloader based on Node.js and Electron.
 
+[中文/Chinese](README.CN.md)
+
 ## Features
 Download Video (.flv) and Danmaku files (.xml or .ass).
 

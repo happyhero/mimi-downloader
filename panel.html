@@ -8,15 +8,17 @@
 	.checkbox {
 		margin: 0px auto !important;
 	}
-	.info, #nav {
-		display: none;
+	.mt20 {
 		margin-top: 20px;
 	}
-	#download {
-		margin-top: 20px;
+	.info, #nav {
+		display: none;
 	}
 	img {
 		max-width: 80%;
+	}
+	.input-group-addon {
+		cursor: pointer;
 	}/*
 	table {
 		word-break: break-all;
@@ -51,12 +53,12 @@
 		<button class="btn btn-default" onclick="about()">关于</button>
 	</div>
 	
-	<ul class="nav nav-tabs row" id="nav">
+	<ul class="nav nav-tabs row mt20" id="nav">
 		<li role="presentation" class="active" onclick="changeMenu(0)"><a>下载地址</a></li>
 		<li role="presentation" onclick="changeMenu(1)"><a>视频信息</a></li>
 	</ul>
 
-	<div class="info">
+	<div class="info mt20">
 		<div class="row">
 			<div class="form-group">
 			视频CID：
@@ -83,30 +85,32 @@
 				<tbody>
 				</tbody>
 			</table>
+
+			<button class="btn btn-primary" onclick="selectAll()">全选</button>
+			<button class="btn btn-default" onclick="selectReverse()">反选</button>
+			<button class="btn btn-danger" onclick="selectNone()">全不选</button>
 		</div>
 	
 		<div class="row">
-			<div class="form-group">
+			<div class="form-group mt20">
 			下载路径
 				<div class="input-group">
-				  	<div class="input-group-addon" onclick="openDialog()">浏览</div>
 					<input type="text" class="form-control" id="downloadPath"/>
+				  	<div class="input-group-addon" onclick="openDialog()">浏览</div>
 				</div>
 			</div>
 		</div>
 
 		<div class="row">
 			<button class="btn btn-success" onclick="download()">下载选中片段</button>
-			<button class="btn btn-primary" onclick="selectAll()">全选</button>
-			<button class="btn btn-default" onclick="selectReverse()">反选</button>
-			<button class="btn btn-danger" onclick="selectNone()">全不选</button>
+			<button class="btn btn-primary" onclick="openPath()">打开下载目录</button>
 		</div>
 
-		<div class="row" id="download">
+		<div class="row mt20" id="download">
 		</div>
 	</div>
 
-	<div class="info">
+	<div class="info mt20">
 		<div class="row">
 			<table class="table table-striped">
 				<thead>

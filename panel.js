@@ -26,10 +26,6 @@ function getVideoUrl() {
 	return videoUrl;
 }
 
-function backupUrl() {
-	alert("[Error]获取PlayUrl或下载链接出错，请手动输入PlayUrl！");
-}
-
 function getAid() {
 	videoUrl = getVideoUrl();
 	if (!videoUrl) return; // || !playUrl
@@ -93,7 +89,7 @@ function generatePlayUrl() {
 		return "http://bangumi.bilibili.com/player/web_api/playurl?" + params + "&sign=" + sign;
 	}
 	else {
-		params = "appkey=84956560bc028eb7&cid=" + cid + "&otype=json&qn=112&quality=112&type=";
+		params = "appkey=84956560bc028eb7&cid=" + cid + "&qn=112&quality=112&type=";
 		sign = hex_md5(params + "94aba54af9065f71de72f5508f1cd42e");
 		return "http://interface.bilibili.com/v2/playurl?" + params + "&sign=" + sign;
 	}
@@ -103,35 +99,21 @@ function generatePlayUrl() {
 function getData(url) {
 	$.ajax(url, {
 		type: "get",
-		dataType: "text",
+		dataType: "xml",
 		error: function(xhr, status, error) {
-			backupUrl();
+			alert("[Error]获取PlayUrl或下载链接出错！");
 		},
 		success: function(data, status, xhr) {
-			console.log(url, data);
-			if (url.indexOf("interface") != -1) data = JSON.parse(data);
-			else {/*
-				var temp = (new DOMParser()).parseFromString(data, 'text/xml');
-				data.durl = new Array();
-				for (var i in temp) {
-					//data.durl.push
-				}
-				console.log(data);*/
-				function convertXml(data) {
-				   	return xml2json((new DOMParser()).parseFromString(data, "text/xml"), " ");
-				}
-				data = convertXml(data);
-				console.log(data);
-			}
-			parseData(data);
+			//console.log(url, data);
+			parseData($(data));
 		}
 	});
 }
 
 function parseData(data) {
-	var target = data.durl;
-	if (!target) {
-		backupUrl();
+	var target = data.find("durl");
+	if (!target || !target.length) {
+		alert("[Error]获取PlayUrl或下载链接出错！");
 		return;
 	}
 	$("#cid").html(cid);
@@ -146,17 +128,17 @@ function parseData(data) {
 		16: "流畅 360P",
 		15: "流畅 360P"
 	} //需要修改，不是一一对应
-	var quality = qualityArray[data.quality] || "未知";
+	var quality = qualityArray[data.find("quality").text()] || "未知";
 	$("#quality").html(quality);
 	$("tbody").eq(0).html("");
 	links = new Array();
-	for (var i in target) {
-		var part = target[i];
-		links.push(part.url);
+	target.each(function(i, o) {
+		var part = $(o);
+		links.push(part.find("url").text());
 		$("tbody").eq(0).append("<tr>\
-			<td>" + part.order + "</td>\
-			<td>" + part.length + "</td>\
-			<td>" + part.size + "</td>\
+			<td>" + part.find("order").text() + "</td>\
+			<td>" + part.find("length").text()  / 1e3 + "</td>\
+			<td>" + part.find("size").text() / 1e6 + "</td>\
 			<td>\
 				<div class=\"checkbox\">\
 					<label>\
@@ -165,7 +147,7 @@ function parseData(data) {
 			  	</div>\
 			</td>\
 		</tr>");
-	}
+	});
 	$("#nav").show();
 	if ($(".info").eq(1).is(":hidden")) $(".info").eq(0).fadeIn();
 }

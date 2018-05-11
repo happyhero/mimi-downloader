@@ -18,10 +18,6 @@ npm install
 npm start
 ```
 If everything's OK, you'll see a new window named "Mimi Downloader". Input the videourl, then follow the guide to download files.  
-If playurl is required, you can get it like this:
-
-![demo-video](help.png)
-
 You can combine flv video parts using ffmpeg:
 ```bash
 cid=11090110

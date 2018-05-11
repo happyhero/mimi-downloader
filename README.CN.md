@@ -34,7 +34,6 @@ ffmpeg -f concat -i temp.txt -c copy $cid.flv
 * [Mimi](http://zsq.im) 本项目的开发者
 * 田生 [XML 转 ASS 库](https://github.com/tiansh/us-danmaku) 以及 bilibili ASS Danmaku Downloader, Mozilla Public License 2.0
 * soimort [you-get](https://github.com/soimort/you-get) MIT license 提供了部分api
-* henrikingo [xml2json](https://github.com/henrikingo/xml2json) GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 * [md5](http://pajhome.org.uk/crypt/md5) BSD License
 
 ## 许可证

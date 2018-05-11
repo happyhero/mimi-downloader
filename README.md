@@ -37,7 +37,6 @@ Note: If you're using Linux Bash for Windows, [see this guide](https://www.howto
 * [Mimi](http://zsq.im) Developer of this project.
 * 田生 [XML to ASS Library](https://github.com/tiansh/us-danmaku) and bilibili ASS Danmaku Downloader, Mozilla Public License 2.0
 * soimort [you-get](https://github.com/soimort/you-get) MIT license
-* henrikingo [xml2json](https://github.com/henrikingo/xml2json) GNU LESSER GENERAL PUBLIC LICENSE Version 2.1
 * [md5](http://pajhome.org.uk/crypt/md5) BSD License
 
 ## License

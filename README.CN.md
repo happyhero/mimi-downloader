@@ -46,6 +46,6 @@ http://www.gnu.org/licenses/gpl-3.0.html
 断点续传
 
 ## 不同分支的内容
-- bilihelper 主分支，采用了来自you-get的api，bangumi和movie需要手动输入PlayUrl
-- master 均需要手动输入PlayUrl
+- master 主分支，采用了来自you-get的api，bangumi和movie需要手动输入PlayUrl
+- backup 均需要手动输入PlayUrl
 - you-get 未完成，bangumi和movie无法下载高清

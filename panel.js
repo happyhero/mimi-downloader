@@ -154,17 +154,17 @@ function parseData(data) {
 
 function openDialog() {
 	var defaultpath = $("#downloadPath").val() || __dirname;
-    dialog.showOpenDialog({
-        defaultPath: defaultpath,
-        properties: [
-            "openDirectory", //打开路径
-        ],
-        filters: [
-            //{ name: 'zby', extensions: ['json'] },
-        ]
-    }, function(res) {
-        if (res[0]) $("#downloadPath").val(res[0]);
-    });
+	dialog.showOpenDialog({
+		defaultPath: defaultpath,
+		properties: [
+			"openDirectory", //打开路径
+		],
+		filters: [
+			//{ name: 'zby', extensions: ['json'] },
+		]
+	}, function(res) {
+		if (res[0]) $("#downloadPath").val(res[0]);
+	});
 }
 
 function download(data) {

@@ -155,9 +155,9 @@ window.addEventListener("beforeunload", e => {
 });
 
 $("button").each(function() {
-    $(this).get(0).addEventListener("click", function() {
-    	this.blur();
-    });
+	$(this).get(0).addEventListener("click", function() {
+		this.blur();
+	});
 });
 
 $("#downloadPath").val(__dirname);
